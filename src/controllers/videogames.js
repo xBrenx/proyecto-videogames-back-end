@@ -20,12 +20,11 @@ for (let i = 1; i <= 5; i++) {
      released: o.released,
     //  description: o.description,
      plataforms: o.platforms ?.map(a => a.platform.name) ,
-     genres: o.genres?.map(o => o.name)
+     genders: o.genres?.map(o => o.name)
     })
   });
-  // if(!allgames) throw "Ups! No se encontraron los videojuegos.";
-  return allgames;
 }
+return allgames;
 } catch (error) {
   console.log(error)
 }
@@ -85,7 +84,7 @@ try {
     platforms: j.platforms,
     released: j.released,
     createdInDb: j.createdInDb,
-    genders: j.genders.map(g => g.name)
+    genders: j.genders.map(g => g.name[0])
   }})
 
      return game;
@@ -101,7 +100,7 @@ try {
             id: a.id,
             name: a.name,
             image: a.background_image,
-            genres: a.genres.map(gen => gen.name),
+            genders: a.genres.map(gen => gen.name),
             description: a.description_raw,
             released: a.released,
             rating: a.rating,
@@ -125,7 +124,7 @@ try {
      image: o.background_image,
      rating: o.rating,
      plataforms: o.platforms ?.map(a => a.platform.name).join(", ") ,
-     genres: o.genres?.map(o => o.name).join(", ")
+     genres: o.genres?.map(o => o.name).join(", ") 
 
       })
     }

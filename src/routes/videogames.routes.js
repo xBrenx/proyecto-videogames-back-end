@@ -42,7 +42,7 @@ router.get("/:id", async (req, res)=>{
             res.status(200).send(res2)
         }else{
             const res1 = await get_oneVideogameAp(id)
-             res.status(200).json(res1)
+             res.status(200).send([res1])
         }
         
     } catch (error) {
