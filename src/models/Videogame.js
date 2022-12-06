@@ -15,7 +15,7 @@ module.exports = (sequelize) => {
       unique: true,
     },
     image:{
-      type: DataTypes.TEXT,
+      type: DataTypes.STRING,
     },
     description: {
       type: DataTypes.TEXT,
@@ -24,18 +24,19 @@ module.exports = (sequelize) => {
     },
     released: {
       type: DataTypes.DATEONLY,
+      defaultValue: DataTypes.NOW,
     },
     rating: {
       type: DataTypes.FLOAT,
     },
     platforms: {
       type: DataTypes.ARRAY(DataTypes.STRING),
-      allowNull: false
+      allowNull: false,
     },
     createdInDb: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
-      defaultValue: true
+      defaultValue: true,
     },
   },{timestamps: false});
 };

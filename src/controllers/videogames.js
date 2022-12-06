@@ -18,7 +18,6 @@ for (let i = 1; i <= 5; i++) {
      image: o.background_image,
      rating: o.rating,
      released: o.released,
-    //  description: o.description,
      plataforms: o.platforms ?.map(a => a.platform.name) ,
      genders: o.genres?.map(o => o.name)
     })
@@ -80,7 +79,7 @@ try {
     description: j.description,
     name: j.name,
     rating: j.rating,
-    img: j.image,
+    image: j.image,
     platforms: j.platforms,
     released: j.released,
     createdInDb: j.createdInDb,
