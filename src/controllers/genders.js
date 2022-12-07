@@ -3,9 +3,14 @@ require('dotenv').config();
 const {API_KEY} = process.env;
  const { Gender } = require('../db');
 
+
 get_allGendersAp = async () => {
 try {
-  const url = await axios.get(`https://api.rawg.io/api/genres?key=${API_KEY}`)
+  const url = await axios({
+    method: "get",
+    url: `https://api.rawg.io/api/genres?key=9d78726f7e85468488fa0a20cb392070`,
+    headers: { "Accept-Encoding": "null" },
+  })
   const allgenders = []
   
    url.data.results.map(o => {
@@ -25,7 +30,11 @@ try {
 
  get_oneGenderAp = async (id) => {
 try {
-  const url = await axios.get(`https://api.rawg.io/api/genres?key=${API_KEY}`)
+  const url = await axios({
+    method: "get",
+    url: `https://api.rawg.io/api/genres?key=9d78726f7e85468488fa0a20cb392070`,
+    headers: { "Accept-Encoding": "null" },
+  })
   const all = await url.data.results.filter(b => b.id === id)
   const gender = await all[0].name
   return gender;
