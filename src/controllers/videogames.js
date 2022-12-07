@@ -11,7 +11,7 @@ try {
 for (let i = 1; i <= 5; i++) {
   let url = await axios({
     method: "get",
-    url: `https://api.rawg.io/api/games?key=${API_KEY}&page=${i}`,
+    url: `https://api.rawg.io/api/games?key=9d78726f7e85468488fa0a20cb392070&page=${i}`,
     headers: { "Accept-Encoding": "null" },
   })
   
@@ -100,7 +100,7 @@ try {
        try {
         const juego = await axios({
           method: "get",
-          url: `https://api.rawg.io/api/games/${id}?key=${API_KEY}`,
+          url: `https://api.rawg.io/api/games/${id}?key=9d78726f7e85468488fa0a20cb392070`,
           headers: { "Accept-Encoding": "null" },
         })
         let final = [juego.data].map(a => ({
@@ -124,7 +124,7 @@ get_videogamebynameAp = async (name) => {
 try {
   const res = await axios({
     method: "get",
-    url:`https://api.rawg.io/api/games?key=${API_KEY}&search=${name}`,
+    url:`https://api.rawg.io/api/games?key=9d78726f7e85468488fa0a20cb392070&search=${name}`,
     headers: { "Accept-Encoding": "null" },
   })
   res.data.results.map(o => {

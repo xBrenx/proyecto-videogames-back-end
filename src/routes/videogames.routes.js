@@ -21,10 +21,11 @@ router.get("/", async (req, res) => {
       res.status(200).send(final);
     } else {
       const resp = await get_15games(name);
-      // console.log(resp)
+       console.log(resp)
       res.status(200).send(resp);
     }
   } catch (error) {
+    console.log(error.message);
     res.status(400).send(error.message);
   }
 });
