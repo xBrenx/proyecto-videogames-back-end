@@ -9,7 +9,11 @@ try {
   const allgames = []
 
 for (let i = 1; i <= 5; i++) {
-  let url = await axios.get(`https://api.rawg.io/api/games?key=${API_KEY}&page=${i}`)
+  let url = await axios({
+    method: "get",
+    url: `https://api.rawg.io/api/games?key=${API_KEY}&page=${i}`,
+    headers: { "Accept-Encoding": "null" },
+  })
   
   url.data.results.map(o => {
     allgames.push( {
@@ -94,7 +98,11 @@ try {
 
  get_oneVideogameAp = async (id) => {
        try {
-        const juego = await axios.get(`https://api.rawg.io/api/games/${id}?key=${API_KEY}`)
+        const juego = await axios({
+          method: "get",
+          url: `https://api.rawg.io/api/games/${id}?key=${API_KEY}`,
+          headers: { "Accept-Encoding": "null" },
+        })
         let final = [juego.data].map(a => ({
             id: a.id,
             name: a.name,
@@ -114,7 +122,11 @@ try {
 get_videogamebynameAp = async (name) => {
   const final = []
 try {
-  const res = await axios.get(`https://api.rawg.io/api/games?key=${API_KEY}&search=${name}`)
+  const res = await axios({
+    method: "get",
+    url:`https://api.rawg.io/api/games?key=${API_KEY}&search=${name}`,
+    headers: { "Accept-Encoding": "null" },
+  })
   res.data.results.map(o => {
     if(final.length < 15){
       final.push({
