@@ -4,59 +4,149 @@ const {API_KEY} = process.env;
   const { Videogame, Gender } = require('../db');
   const { Op }=require("sequelize")
 
+  getVideogamesDatabase = async (InDb) => {
+
+    let games = await Videogame.findAll({
+      where: {
+        createdInDb : InDb
+      },
+      include: {
+        model: Gender,
+        attributes: ["name"],
+        through: {
+          attributes: []
+        }
+      }
+      });
+    
+      const allgamesDb = [] 
+       games.map(j => allgamesDb.push({
+                id: j.id,
+                name: j.name,
+                image: j.image,
+                rating: j.rating,
+                released: j.released,
+                description: j.description,
+                platforms: j.platforms,
+                genders: j.genders.map(g=> g.name[0]),
+                createdInDb: j.createdInDb
+       }));
+
+       return allgamesDb;
+
+  }
+  
+ get_oneVideogameAp = async (id) => {
+  try {
+
+   const juego = await axios({
+     method: "get",
+     url: `https://api.rawg.io/api/games/${id}?key=9d78726f7e85468488fa0a20cb392070`,
+     headers: { "Accept-Encoding": "null" },
+   })
+   let final = [juego.data].map(a => ({
+       id: a.id,
+       name: a.name,
+       image: a.background_image,
+       genders: a.genres.map(gen => gen.name),
+       description: a.description_raw,
+       released: a.released,
+       rating: a.rating,
+       platforms: a.platforms.map(plat => plat.platform.name)
+   }))
+   return final[0]
+  } catch (error) {
+   console.log(error)
+  }
+};
+
+const SaveInDb = async (allgamesAp) => {
+
+    allgamesAp.map( async (oneVideogameAp) => {
+  
+    let result = await Videogame.create({
+      name: oneVideogameAp.name,
+      image: oneVideogameAp.image,
+      rating: oneVideogameAp.rating,
+      released: oneVideogameAp.released,
+      description: oneVideogameAp.description,
+      platforms: oneVideogameAp.platforms,
+      genders: oneVideogameAp.genders,
+      createdInDb: oneVideogameAp.createdInDb
+    })
+    
+    oneVideogameAp.genders.forEach(async (element) => {
+      const [genre, created] = await Gender.findOrCreate({
+        where: {
+          name: [element],
+        },
+      });
+    
+      await result.addGender(genre);
+    });
+
+  })
+
+
+}
+
  get_allVideogamesAp = async () => {
 try {
-  const allgames = []
 
-for (let i = 1; i <= 5; i++) {
-  let url = await axios({
-    method: "get",
-    url: `https://api.rawg.io/api/games?key=9d78726f7e85468488fa0a20cb392070&page=${i}`,
-    headers: { "Accept-Encoding": "null" },
-  })
-  
-  url.data.results.map(o => {
-    allgames.push( {
-      id: o.id,
-      name: o.name,
-     image: o.background_image,
-     rating: o.rating,
-     released: o.released,
-     plataforms: o.platforms ?.map(a => a.platform.name) ,
-     genders: o.genres?.map(o => o.name)
-    })
-  });
-}
-return allgames;
+  //Llamamos a todos los juegos guardados en la base de datos, donde createdInDb sea false. Que incluya los nombres de los generos.
+
+  let games = await getVideogamesDatabase(false)
+    
+     if(games.length > 0){
+      console.log("devuelvo DB");
+      return games;
+     }else{
+
+      //TOMAMOS LA INFORMACIÓN DE LA API----------
+      let id = 1
+      const allgamesAp = []
+      for (let i = 1; i <= 6; i++) {
+        let url = await axios({
+          method: "get",
+          url: `https://api.rawg.io/api/games?key=9d78726f7e85468488fa0a20cb392070&page=${i}`,
+          headers: { "Accept-Encoding": "null" },
+        })
+        
+        url.data.results.map(async (o) => {
+          let desc = await get_oneVideogameAp(o.id)
+          allgamesAp.push( {
+            id: id,
+            name: o.name,
+           image: o.background_image,
+           rating: o.rating,
+           released: o.released,
+           description: desc.description,
+           platforms: o.platforms ?.map(a => a.platform.name) ,
+           genders: o.genres?.map(o => o.name),
+           createdInDb: false
+          })
+          id = id + 1
+        });
+      }
+
+      //Lo guardamos en la base de datos-----------
+
+      const saved = await SaveInDb(allgamesAp)
+
+     return allgamesAp;
+     }
 } catch (error) {
   console.log(error)
 }
  };
 
+
+ 
+
  get_allVideogamesDb = async () => {
 try {
-  const games = await Videogame.findAll({
-  include: {
-    model: Gender,
-    attributes: ["name"],
-    through: {
-      attributes: []
-    }
-  }
-  })
-
-  const final = [] 
-   games.map(j => final.push({
-            id: j.id,
-            name: j.name,
-            image: j.image,
-            rating: j.rating,
-            released: j.released,
-            description: j.description,
-            platforms: j.platforms,
-            genders: j.genders.map(g=> g.name[0]),
-            createdInDb: j.createdInDb
-   }))
+  const final = await getVideogamesDatabase(true)
+  
   return final;
 } catch (error) {
   console.log(error)
@@ -96,83 +186,28 @@ try {
   }
  };
 
- get_oneVideogameAp = async (id) => {
-       try {
-        const juego = await axios({
-          method: "get",
-          url: `https://api.rawg.io/api/games/${id}?key=9d78726f7e85468488fa0a20cb392070`,
-          headers: { "Accept-Encoding": "null" },
-        })
-        let final = [juego.data].map(a => ({
-            id: a.id,
-            name: a.name,
-            image: a.background_image,
-            genders: a.genres.map(gen => gen.name),
-            description: a.description_raw,
-            released: a.released,
-            rating: a.rating,
-            platforms: a.platforms.map(plat => plat.platform.name)
-        }))
-        return final[0]
-       } catch (error) {
-        console.log(error)
-       }
-};
-
 get_videogamebynameAp = async (name) => {
-  const final = []
 try {
-  const res = await axios({
-    method: "get",
-    url:`https://api.rawg.io/api/games?key=9d78726f7e85468488fa0a20cb392070&search=${name}`,
-    headers: { "Accept-Encoding": "null" },
-  })
-  res.data.results.map(o => {
-    if(final.length < 15){
-      final.push({
-        id: o.id,
-      name: o.name,
-     image: o.background_image,
-     rating: o.rating,
-     plataforms: o.platforms ?.map(a => a.platform.name).join(", ") ,
-     genres: o.genres?.map(o => o.name).join(", ") 
+  const allGames = await getVideogamesDatabase(false)
 
-      })
-    }
-  })
-  // console.log(final)
-  return final;
-} catch (error) {z
+    const final = await allGames?.filter(g => g.name.toLowerCase().includes(name.toLowerCase()))
+  
+    return final;
+} catch (error) {
   console.log(error)
 }
 };
 
 get_videogamebynameDb = async (name) => {
   try {
-      let DBJuegosByName = await Videogame.findAll({
-          where : {
-              name : {[Op.iLike] : '%'+name+'%'}
-          },
-          include: {
-              model: Gender,
-              atributes: ['name'],
-              throught: {
-                  attributes: ['name']
-              }
-          } 
-      })
-      const resp = await DBJuegosByName.map(juego => {return{
-          id: juego.id,
-          description: juego.description,
-          name: juego.name,
-          rating: juego.rating,
-          img: juego.background_image,
-          platforms: juego.platforms,
-          release: juego.released,
-          createdInDb: juego.createdInDb,
-          genres: juego.genres.map(genere=> genere.name)
-      }})
-      return resp
+    const allGames = await getVideogamesDatabase(true)
+  if(allGames.length > 0){
+    const final = await allGames?.filter(g => g.name.toLowerCase().includes(name.toLowerCase()))
+    
+    return final;
+  }else{
+    return "Nothing";
+  }
   } catch (error) {
       console.log(error)
   }
@@ -182,8 +217,16 @@ get_15games = async (name) => {
   try {
     const ApiInfo = await get_videogamebynameAp(name)
     const DBInfo = await get_videogamebynameDb(name)
-    const allinfo = DBInfo.concat(ApiInfo).slice(0,15)
-    return allinfo
+
+   if(DBInfo !== "Nothing"){
+
+    let allinfo = DBInfo.concat(ApiInfo).slice(0,15)
+    return allinfo;
+   }else{
+  
+    let allinfo = ApiInfo.slice(0,15)
+    return allinfo;
+   }
 } catch (error) {
     console.log(error)
 }

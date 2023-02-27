@@ -12,6 +12,7 @@ const router = Router();
 
 router.get("/", async (req, res) => {
   const { name } = req.query;
+ 
   try {
     if (!name) {
       let allgames = await get_allVideogamesAp();
@@ -20,6 +21,7 @@ router.get("/", async (req, res) => {
       let final = [...resp, ...allgames];
       res.status(200).send(final);
     } else {
+     
       const resp = await get_15games(name);
        console.log(resp)
       res.status(200).send(resp);
@@ -32,21 +34,11 @@ router.get("/", async (req, res) => {
 
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
-  var boo = false;
 
-  for (let i = 0; i < id.length; i++) {
-    if (id[i] >= "a") {
-      boo = true;
-    }
-  }
   try {
-    if (boo) {
       const res2 = await get_oneVideogameDb(id);
+      console.log(res2);
       res.status(200).send(res2);
-    } else {
-      const res1 = await get_oneVideogameAp(id);
-      res.status(200).send([res1]);
-    }
   } catch (error) {
     res.status(400).send(error);
   }
@@ -55,6 +47,8 @@ router.get("/:id", async (req, res) => {
 router.post("/", async (req, res) => {
   const { name, image, platforms, description, released, rating, gender } =
     req.body;
+
+    const createdInDb = true
 
   try {
     const result = await Videogame.create({
@@ -65,6 +59,7 @@ router.post("/", async (req, res) => {
       released,
       rating,
       gender,
+      createdInDb
     });
 
     gender.forEach(async (element) => {
